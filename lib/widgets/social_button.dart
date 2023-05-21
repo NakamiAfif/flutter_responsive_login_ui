@@ -30,7 +30,8 @@ class SocialButton extends StatelessWidget {
         ),
       ),
       style: TextButton.styleFrom(
-        padding: EdgeInsets.symmetric(vertical: 30, horizontal: horizontalPadding),
+        padding:
+            EdgeInsets.symmetric(vertical: 30, horizontal: horizontalPadding),
         shape: RoundedRectangleBorder(
           side: const BorderSide(
             color: Pallete.borderColor,

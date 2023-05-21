@@ -6,6 +6,8 @@ class LoginField extends StatelessWidget {
   const LoginField({
     Key? key,
     required this.hintText,
+    required bool obscureText,
+    required TextEditingController controller,
   }) : super(key: key);
 
   @override
