@@ -13,7 +13,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 class Item {
   final String title;
   final String description;
-  final List<String> images;
+  final List<XFile> images;
 
   Item(this.title, this.description, this.images);
 }
@@ -43,7 +43,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     });
 
     final picker = ImagePicker();
-    List<String> pickedImages = [];
+    List<XFile> pickedImages = [];
 
     Future<void> _pickImages() async {
       List<XFile> resultList = [];
@@ -57,7 +57,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       if (!mounted) return;
 
       setState(() {
-        pickedImages = resultList.map((file) => file.path).toList();
+        pickedImages = resultList;
       });
     }
 
@@ -103,8 +103,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         itemBuilder: (context, index) {
                           return Padding(
                             padding: const EdgeInsets.all(4.0),
-                            child: Image.network(
-                              'http://localhost/uploads/${path.basename(pickedImages[index])}',
+                            child: Image.file(
+                              File(pickedImages[index].path),
                               width: 80,
                               height: 80,
                               fit: BoxFit.cover,
@@ -165,14 +165,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   void registerItem(Item item) async {
-    var url = 'http://localhost/barterit/register_item.php';
+    var url = 'http://192.168.134.1/barterit/register_item.php';
 
     var request = http.MultipartRequest('POST', Uri.parse(url));
 
     if (item.images.length == 3) {
       for (var i = 0; i < item.images.length; i++) {
-        var imageUrl = item.images[i];
-        request.fields['picture[]'] = imageUrl;
+        var file = File(item.images[i].path);
+        var stream = http.ByteStream(file.openRead());
+        var length = await file.length();
+        var multipartFile = http.MultipartFile(
+          'picture[]', // Use "picture[]" as the field name to indicate multiple files
+          stream,
+          length,
+          filename: path.basename(file.path),
+        );
+        request.files.add(multipartFile);
       }
 
       request.fields['title'] = item.title;
@@ -274,7 +282,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       child: FloatingActionButton(
                         backgroundColor: Color.fromARGB(255, 245, 244, 244),
                         onPressed: _openRegistrationDialog,
-                        child: Icon(Icons.add, color: Colors.black),
+                        child: Icon(Icons.add),
                       ),
                     ),
                   ],
@@ -293,33 +301,35 @@ class DashboardItem extends StatelessWidget {
   final String title;
   final VoidCallback onTap;
 
-  DashboardItem({required this.icon, required this.title, required this.onTap});
+  const DashboardItem({
+    Key? key,
+    required this.icon,
+    required this.title,
+    required this.onTap,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return InkWell(
       onTap: onTap,
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          CircleAvatar(
-            backgroundColor: Colors.white,
-            radius: 30,
-            child: Icon(icon, color: Colors.black, size: 30),
+          Icon(
+            icon,
+            color: Colors.white,
+            size: 48,
           ),
           SizedBox(height: 8),
           Text(
             title,
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+            ),
           ),
         ],
       ),
     );
   }
-}
-
-void main() {
-  runApp(MaterialApp(
-    debugShowCheckedModeBanner: false,
-    home: DashboardScreen(),
-  ));
 }
