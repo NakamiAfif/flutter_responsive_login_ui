@@ -38,6 +38,9 @@ dependencies:
   flutter_svg: ^1.1.6
   page_transition: ^2.0.9
   http: ^0.13.5
+  image_picker: ^0.8.8
+  multi_image_picker: ^4.8.01
+  fluttertoast: ^8.2.2
 
 dev_dependencies:
   flutter_test:
